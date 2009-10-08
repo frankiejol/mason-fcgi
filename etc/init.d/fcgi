@@ -1,0 +1,128 @@
+#!/bin/sh
+#
+# nginx-fcgi
+#
+# chkconfig:	345 85 15
+# description:	nginx-fcgi is a perl script to provide simple cgi support for nginx http daemon
+# processname:	nginx-fcgi
+# pidfile:	/var/run/nginx-fcgi.pid
+# config:	/etc/sysconfig/nginx-fcgi
+
+
+# Source function library
+#. /etc/rc.d/init.d/functions
+
+# Get network config
+#. /etc/sysconfig/network
+
+# Get service config
+ME=`basename $0`
+
+PROG=/var/www/mason/mason_fcgi.pl
+CONFIG=/etc/default/$ME
+if [ ! -f $CONFIG ]; then
+	echo >&2 "fcgi: Missing $CONFIG config file"
+	exit 1
+else
+	. $CONFIG
+fi
+
+
+checkconfig() {
+
+	if [ -z "$SPAWN_UID" ]; then
+		echo >&2 "fcgi: Missing SPAWN_UID value (user name)"
+		exit 1
+	fi
+
+	if [ -z $SPAWN_GID ]; then
+		echo >&2 "fcgi: Missing SPAWN_GID value (group name)"
+		exit 1
+	fi
+
+	if [ -n "$SPAWN_PORT" -a -n "$SPAWN_SOCKET" ]; then
+		echo >&2 "fcgi: port and socket can not be used simulatenously"
+		exit 1
+	fi
+
+	if [ -n "$SPAWN_ADDR" -a -z "$SPAWN_PORT" ]; then
+		 echo >&2 "fcgi: bind address specified but no port"
+		 exit 1
+	fi
+
+	if [ -z "$SPAWN_LOG" ]; then
+		echo >&2 "fcgi: missing declaration of log file"
+		exit 1
+	fi
+
+	USER_ID=`id -u $SPAWN_UID 2>&1 > /dev/null`
+	if [ $USER_ID -eq $USER_ID > /dev/null 2>&1 ]; then
+		USER_ID=`id -u $SPAWN_UID`
+	else
+		echo >&2 "fcgi: $SPAWN_UID user not found in system"
+		exit 1
+	fi
+
+#	USER_GID=`getgid $SPAWN_GID 2>&1 > /dev/null`
+#	if [ -z "$USER_GID" ]; then
+#		USER_GID=`getgid $SPAWN_GID`
+#	else
+#		echo >&2 "nginx-fcgi: $SPAWN_UID group not found in system"
+#		exit 1;
+#	fi
+}
+
+start() {
+	# Check if the service is already running?
+	if [ ! -f /var/lock/subsys/$ME ]; then
+		echo -n $ME: 
+		
+		start-stop-daemon --start --exec $PROG --group $SPAWN_GID --chuid $SPAWN_UID -- --pid $SPAWN_PID "$SPAWN_OPT" --socket $SPAWN_SOCKET --log $SPAWN_LOG
+		RETVAL=$?
+		if [ $RETVAL -eq 0 ]; then
+			echo started
+		else
+			echo failed
+		fi
+	else
+		echo already running $ME
+	fi
+}
+
+stop() {
+	# Stop daemons.
+	start-stop-daemon --stop --pidfile $SPAWN_PID
+	echo -n "$ME: "
+		# Delete pidfile only when nginx was called successfully
+		if [ $? -eq 0 ]; then
+			rm -f /var/lock/subsys/$ME "$SPAWN_PID"  >/dev/null 2>&1
+		fi
+	echo "stopped"
+}
+
+
+RETVAL=0
+
+case "$1" in
+  start)
+  	checkconfig
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  status)
+	status $ME
+	RETVAL=$?
+	;;
+  restart)
+	stop
+	start
+	;;
+  *)
+	echo "$0 {start|stop|restart|status}"
+	exit 3
+	;;
+esac
+
+exit $RETVAL
