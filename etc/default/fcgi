@@ -1,0 +1,18 @@
+# User and Group to use for spawned FCGI app.
+   SPAWN_UID="www-data"
+   SPAWN_GID="www-data"
+# Bind to unix-domain socket, running as above
+   SPAWN_SOCKET="/var/run/fcgi/mason_fcgi.sock"
+   # Bind to tcp port 1026 on localhost.
+   # Address myst be IPv4 not name.
+#   SPAWN_PORT="1026"
+#   SPAWN_ADDR="127.0.0.1"
+# log file
+   SPAWN_LOG="/var/log/nginx/fcgi/nginx-fcgi.log"
+# pid file
+   SPAWN_PID="/var/run/fcgi/fcgi.pid"
+# extra options
+   SPAWN_OPT=""
+#SPAWN_OPT="verbose"
+
+FGCI_SCRIPT=/var/www/mason/mason_fcgi.pl
