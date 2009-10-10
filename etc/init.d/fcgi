@@ -35,7 +35,7 @@ checkconfig() {
 	fi
 
 	if [ -z "$SPAWN_SOCKET" ]; then
-		echo 2>&2 "$ME: missing SPAWN_SOCKET in $CONFIG
+		echo 2>&2 "$ME: missing SPAWN_SOCKET in $CONFIG"
 	fi
 
 	USER_ID=`id -u $SPAWN_UID 2>&1 > /dev/null`
