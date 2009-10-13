@@ -15,4 +15,4 @@
    SPAWN_OPT=""
 #SPAWN_OPT="verbose"
 
-FGCI_SCRIPT=/var/www/mason/mason_fcgi.pl
+FCGI_SCRIPT=/var/www/mason/mason_fcgi.pl
