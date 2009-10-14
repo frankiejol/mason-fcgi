@@ -11,20 +11,37 @@ my $LOGFILE = "/var/log/nginx/fcgi/fcgi.log";
 my $WORKSPACE = "/var/www/mason/workspace";
 my $PIDFILE = "/var/run/fcgi/fcgi.pid";
 my $BASEDIR = "/var/www";
+my $ERROR_URI = "/errors/503.html";
+my ($DEFAULT_HOST) = keys %SITES;
+
+my $HELP;
 
 BEGIN {
-  my $socket;
+  my ($socket);
+
   GetOptions( 
-	   'pid=s' => \$PIDFILE,
-	   'log=s' => \$LOGFILE,
-	'socket=s' => \$socket,
-	'basedir=s'=> \$BASEDIR,
-	'workspace=s' => \$WORKSPACE,
+			  'help' => \$HELP,
+	         'pid=s' => \$PIDFILE,
+	         'log=s' => \$LOGFILE,
+	      'socket=s' => \$socket,
+	     'basedir=s'=> \$BASEDIR,
+	   'workspace=s' => \$WORKSPACE,
+	   'error-uri=s' => \$ERROR_URI,
+	'default-host=s' => \$DEFAULT_HOST
 
   );
   $ENV{FCGI_SOCKET_PATH} ||= '/var/run/fcgi/mason_fcgi.sock';
   $ENV{FCGI_SOCKET_PATH} = $socket if $socket;
   $ENV{FCGI_LISTEN_QUEUE} ||= 10;
+}
+
+if ($HELP) {
+	my ($me) = $0 =~ m{.*/(.*)};
+	print "$me [--help] [--pid=$PIDFILE] [--log=$LOGFILE]"
+		." [--socket=$ENV{FCGI_SOCKET_PATH}]"
+		." [--basedir=$BASEDIR] [--workspace=$WORKSPACE]"
+		." [--error-uri=$ERROR_URI] [--default-host=$DEFAULT_HOST]\n";
+	exit 0;
 }
  
 use CGI::Fast;
@@ -110,14 +127,19 @@ while (my ($site, $comp_base) = each %SITES) {
 ### request loop: foreach one, decide which vhost is the target, and call appropriate handler
 while (my $cgi = new CGI::Fast()) {
   my ($host) = $ENV{HTTP_HOST} =~ /^(.+?)(:\d+)?$/;
+  my $request_uri = $ENV{REQUEST_URI};
+  if ( ! $SITES{$host} ) {
+ 	$request_uri = $ERROR_URI;
+	addlog($LOGFILE,">> Uknown site $host. It should be added to $0");
+	$host = $DEFAULT_HOST;
+  }
   addlog($LOGFILE,">> HIT for '$host' => '$ENV{REQUEST_URI}'");
  
   ### Make sure we have a clean stash when we start
   %HTML::Mason::Commands::stash = ();
   
   # hand off to mason
-  # FIXME: need to deal with unknown sites
-  $cgi->path_info($ENV{REQUEST_URI});
+  $cgi->path_info($request_uri);
   eval { $handlers{$host}->handle_cgi_object($cgi) };
   if (my $raw_error = $@) {
     addlog($LOGFILE,$raw_error);
