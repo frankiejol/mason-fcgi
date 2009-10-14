@@ -1,0 +1,23 @@
+server {
+    listen   80;
+    server_name  debian.localdomain;
+
+    access_log  /var/log/nginx/localhost.access.log;
+
+    location / {
+        root /var/www/test;
+        rewrite (.*/[^./]+$)    $1/index.html permanent;
+        rewrite (.*)/$          $1/index.html permanent;
+
+        index  index.html index.htm;
+
+        fastcgi_pass    unix:/var/run/fcgi/mason_fcgi.sock;
+        fastcgi_read_timeout    5m;
+        include /etc/nginx/nginx-fcgi.conf;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /var/www/nginx-default;
+    }
+}
