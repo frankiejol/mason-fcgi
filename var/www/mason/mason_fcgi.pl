@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use lib 'lib';
 use Getopt::Long;
+
+my %SITES = ( 'debian.localdomain' => 'site1' );
  
 my $LOGFILE = "/var/log/nginx/fcgi/fcgi.log";
 my $WORKSPACE = "/var/www/mason/workspace";
@@ -83,15 +85,10 @@ if( $pid ) {
     exit 0;
 }
 
-### All the vhosts we support. For each one specify the override comp_root
-my %sites = (
-  'site1.example.com' => 'site1',
-);
- 
 ### Create the Mason handlers per site
 my %handlers;
  
-while (my ($site, $comp_base) = each %sites) {
+while (my ($site, $comp_base) = each %SITES) {
   $handlers{$site} = HTML::Mason::CGIHandler->new(
     comp_root => "$BASEDIR/$comp_base",
 #      [[$comp_base => "$base/$comp_base"], [master => "$base/master"],],
