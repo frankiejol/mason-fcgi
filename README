@@ -1,0 +1,19 @@
+
+These files allow running HTML::Mason web sites with nginx+FastCGI.
+
+
+Howto:
+
+
+Credits:
+
+I wrote those files and tutorials with the help of many places. I hope I won't
+miss any:
+
+- http://github.com/melo/exp-mason-fcgi/
+- http://www.nginx.eu/nginx-fcgi.html
+- http://technotes.1000lines.net/?p=23
+
+Me:
+
+Francesc Guasch -  frankie  etsetb upc edu
