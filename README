@@ -5,6 +5,12 @@ These files allow running HTML::Mason web sites with nginx+FastCGI.
 Howto:
 
 
+License:
+
+GNU GENERAL PUBLIC LICENSE Version 3
+http://www.gnu.org/licenses/gpl.html
+
+
 Credits:
 
 I wrote those files and tutorials with the help of many places. I hope I won't
