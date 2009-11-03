@@ -20,8 +20,6 @@ done
 
 echo "Downloading"
 
-exit 
-
 cd /etc/init.d/
 wget http://github.com/frankiejol/mason-fcgi/raw/master/etc/init.d/fcgi
 chmod +x fcgi
