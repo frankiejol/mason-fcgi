@@ -156,7 +156,7 @@ while (my $cgi = new CGI::Fast()) {
   %HTML::Mason::Commands::stash = ();
   
   $ENV{SCRIPT_NAME} = '';
-  $cgi->path_info($ENV{REQUEST_URI});
+  $cgi->path_info($ENV{DOCUMENT_URI});
 
   eval { $handlers{$host}->handle_cgi_object($cgi) };
   if (my $raw_error = $@) {
